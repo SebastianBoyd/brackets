@@ -32,42 +32,6 @@ define(function (require, exports, module) {
         FileSystemStats = require("filesystem/FileSystemStats"),
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
 
-    var repo = {};
-
-    // This only works for normal repos.  Github doesn't allow access to gists as
-    // far as I can tell.
-    var githubName = "SebastianBoyd/HomeAccessClient";
-
-    // Your user can generate these manually at https://github.com/settings/tokens/new
-    // Or you can use an oauth flow to get a token for the user.
-    var githubToken = "b3a6f4ef3b5186f12e88ebbf3155f9f1ad155797";
-
-    // Mixin the main library using github to provide the following:
-    // - repo.loadAs(type, hash) => value
-    // - repo.saveAs(type, value) => hash
-    // - repo.readRef(ref) => hash
-    // - repo.updateRef(ref, hash) => hash
-    // - repo.createTree(entries) => hash
-    // - repo.hasHash(hash) => has
-    require('thirdparty/js-github/mixins/github-db')(repo, githubName, githubToken);
-
-
-    // Github has this built-in, but it's currently very buggy so we replace with
-    // the manual implementation in js-git.
-    require('thirdparty/js-git/mixins/create-tree')(repo);
-
-    // Cache everything except blobs over 100 bytes in memory.
-    // This makes path-to-hash lookup a sync operation in most cases.
-    require('thirdparty/js-git/mixins/mem-cache')(repo);
-
-    // Combine concurrent read requests for the same hash
-    require('thirdparty/js-git/mixins/read-combiner')(repo);
-
-    // Add in value formatting niceties.  Also adds text and array types.
-    require('thirdparty/js-git/mixins/formats')(repo);
-
-    var run = require('thirdparty/gen-run/run');
-
     // Brackets uses FileSystem to read from various internal paths that are not in the user's project storage. We
     // redirect core-extension access to a simple $.ajax() to read from the source code location we're running from,
     // and for now we ignore we possibility of user-installable extensions or persistent user preferences.
@@ -243,50 +207,8 @@ define(function (require, exports, module) {
     }
 
     function showSaveDialog(title, initialPath, proposedNewFilename, callback) {
-      console.log("OK");
-
-        run(function* () {
-          var headHash = yield repo.readRef("refs/heads/master");
-          var commit = yield repo.loadAs("commit", headHash);
-          var tree = yield repo.loadAs("tree", commit.tree);
-          var entry = tree["index.html"];
-          var readme = yield repo.loadAs("text", entry.hash);
-
-          // Build the updates array
-          var updates = [
-            {
-              path: "index.html", // Update the existing entry
-              mode: entry.mode,  // Preserve the mode (it might have been executible)
-              content: readme.toUpperCase() // Write the new content
-            }
-          ];
-          // Based on the existing tree, we only want to update, not replace.
-          updates.base = commit.tree;
-
-          // Create the new file and the updated tree.
-          var treeHash = yield repo.createTree(updates);
-
-          var commitHash = yield repo.saveAs("commit", {
-            tree: treeHash,
-            author: {
-              name: "Sebastian Boyd",
-              email: "lord.of.all.sebastian@gmail.com"
-            },
-            parent: headHash,
-            message: "Change README.md to be all uppercase using js-github"
-          });
-
-          // Now we can browse to this commit by hash, but it's still not in master.
-          // We need to update the ref to point to this new commit.
-          console.log("COMMIT", commitHash)
-
-          // Save it to a new branch (Or update existing one)
-          var new_hash = yield repo.updateRef("refs/heads/new-branch", commitHash);
-
-          // And delete this new branch:
-          //yield repo.deleteRef("refs/heads/new-branch");
-        });
         // FIXME
+        throw new Error();
     }
 
 
