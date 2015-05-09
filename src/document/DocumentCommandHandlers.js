@@ -92,7 +92,7 @@ define(function (require, exports, module) {
      * @type {string}
      */
     var _osDash = brackets.platform === "mac" ? "\u2014" : "-";
-    
+
     /**
      * String template for window title when no file is open.
      * @type {string}
@@ -253,11 +253,28 @@ define(function (require, exports, module) {
     }
 
     /**
+     * Shows an error dialog indicating that the given file could not be opened due to the given error
+     * @param {!FileSystemError} name
+     * @return {!Dialog}
+     */
+    function showFileOpenError(name, path) {
+        return Dialogs.showModalDialog(
+            DefaultDialogs.DIALOG_ID_ERROR,
+            Strings.ERROR_OPENING_FILE_TITLE,
+            StringUtils.format(
+                Strings.ERROR_OPENING_FILE,
+                StringUtils.breakableUrl(path),
+                FileUtils.getFileErrorString(name)
+            )
+        );
+    }
+
+    /**
      * @private
      * Creates a document and displays an editor for the specified file path.
      * @param {!string} fullPath
      * @param {boolean=} silent If true, don't show error message
-     * @param {string=} paneId, the id oi the pane in which to open the file. Can be undefined, a valid pane id or ACTIVE_PANE. 
+     * @param {string=} paneId, the id oi the pane in which to open the file. Can be undefined, a valid pane id or ACTIVE_PANE.
      * @param {{*}=} options, command options
      * @return {$.Promise} a jQuery promise that will either
      * - be resolved with a file for the specified file path or
@@ -288,7 +305,7 @@ define(function (require, exports, module) {
             if (silent) {
                 _cleanup(fileError, fullFilePath);
             } else {
-                FileUtils.showFileOpenError(fileError, fullFilePath).done(function () {
+                showFileOpenError(fileError, fullFilePath).done(function () {
                     _cleanup(fileError, fullFilePath);
                 });
             }
@@ -330,8 +347,8 @@ define(function (require, exports, module) {
      * @param {boolean=} silent - If true, don't show error message
      * @param {string=}  paneId - the pane in which to open the file. Can be undefined, a valid pane id or ACTIVE_PANE
      * @param {{*}=} options - options to pass to MainViewManager._open
-     * @return {$.Promise} a jQuery promise resolved with a Document object or 
-     *                      rejected with an err 
+     * @return {$.Promise} a jQuery promise resolved with a Document object or
+     *                      rejected with an err
      */
     function _doOpenWithOptionalPath(fullPath, silent, paneId, options) {
         var result;
@@ -356,7 +373,7 @@ define(function (require, exports, module) {
                             filesToOpen.push(FileSystem.getFileForPath(path));
                         });
                         MainViewManager.addListToWorkingSet(paneId, filesToOpen);
-                        
+
                         _doOpen(paths[paths.length - 1], silent, paneId, options)
                             .done(function (file) {
                                 _defaultOpenDialogFullPath =
@@ -429,7 +446,7 @@ define(function (require, exports, module) {
             silent = (commandData && commandData.silent) || false,
             paneId = (commandData && commandData.paneId) || MainViewManager.ACTIVE_PANE,
             result = new $.Deferred();
-        
+
         _doOpenWithOptionalPath(fileInfo.path, silent, paneId, commandData && commandData.options)
             .done(function (file) {
                 if (!commandData || !commandData.options || !commandData.options.noPaneActivate) {
@@ -803,7 +820,7 @@ define(function (require, exports, module) {
                 if (suppressError) {
                     result.resolve();
                 } else {
-                    FileUtils.showFileOpenError(error, doc.file.fullPath)
+                    showFileOpenError(error, doc.file.fullPath)
                         .done(function () {
                             result.reject(error);
                         });
@@ -1214,7 +1231,7 @@ define(function (require, exports, module) {
         });
         return unsavedDocs;
     }
-    
+
     /**
      * @param {!Array.<File>} list - the list of files to close
      * @param {boolean} promptOnly - true to just prompt for saving documents with actually closing them.
@@ -1224,7 +1241,7 @@ define(function (require, exports, module) {
     function _closeList(list, promptOnly, _forceClose) {
         var result      = new $.Deferred(),
             unsavedDocs = _getUnsavedDocs(list);
-        
+
         if (unsavedDocs.length === 0 || _forceClose) {
             // No unsaved changes or we want to ignore them, so we can proceed without a prompt
             result.resolve();
@@ -1404,7 +1421,7 @@ define(function (require, exports, module) {
             }
         );
     }
-    
+
     /** In-browser equivalent to handleFileCloseWindow(), much more constrained */
     function handleBeforeUnload() {
         var unsavedDocs = _getUnsavedDocs(DocumentManager.getWorkingSet());
@@ -1415,13 +1432,13 @@ define(function (require, exports, module) {
             });
             return message;
         }
-        
+
         // TODO: Do we want a message even when not unsaved? Easy to hit Ctrl+W via muscle memory right now...
 //        } else {
 //            return Strings.UNLOAD_NO_UNSAVED;
 //        }
     }
-    
+
     /** Show a textfield to rename whatever is currently selected in the sidebar (or current doc if nothing else selected) */
     function handleFileRename() {
         // Prefer selected sidebar item (which could be a folder)
@@ -1440,7 +1457,7 @@ define(function (require, exports, module) {
         if (brackets.unsupportedInBrowser()) {
             return;
         }
-        
+
         return _handleWindowGoingAway(
             commandData,
             function () {
@@ -1511,7 +1528,7 @@ define(function (require, exports, module) {
         if (brackets.unsupportedInBrowser()) {
             return;
         }
-        
+
         var entry = ProjectManager.getSelectedItem();
         if (entry.isDirectory) {
             Dialogs.showModalDialog(
@@ -1549,7 +1566,7 @@ define(function (require, exports, module) {
         if (brackets.unsupportedInBrowser()) {
             return;
         }
-        
+
         var entry = ProjectManager.getSelectedItem();
         if (entry) {
             brackets.app.showOSFolder(entry.fullPath, function (err) {
@@ -1712,11 +1729,15 @@ define(function (require, exports, module) {
     } else if (brackets.platform === "mac") {
         showInOS    = Strings.CMD_SHOW_IN_FINDER;
     }
-    
+
+
     // In-browser, we can't veto closing the way we do in-shell. Best we can do is ugly confirmation dialog via beforeunload
     if (brackets.inBrowser) {
         $(window).on("beforeunload", handleBeforeUnload);
     }
+    
+    // Define public API
+    exports.showFileOpenError = showFileOpenError;
 
     // Deprecated commands
     CommandManager.register(Strings.CMD_ADD_TO_WORKING_SET,          Commands.FILE_ADD_TO_WORKING_SET,        handleFileAddToWorkingSet);
