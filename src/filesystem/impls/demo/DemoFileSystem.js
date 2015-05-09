@@ -32,6 +32,17 @@ define(function (require, exports, module) {
         FileSystemStats = require("filesystem/FileSystemStats"),
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
 
+    require("thirdparty/github");
+    var github = new Github({
+      token: "9d8f9647228bff9f8698523836780d361a17754f",
+      auth: "oauth",
+      apiUrl: "https://api.github.com"
+    });
+    var info = "";
+    var repo = github.getRepo("SebastianBoyd", "Fitness");
+    repo.show(function(err, repo) {info = repo});
+
+
     // Brackets uses FileSystem to read from various internal paths that are not in the user's project storage. We
     // redirect core-extension access to a simple $.ajax() to read from the source code location we're running from,
     // and for now we ignore we possibility of user-installable extensions or persistent user preferences.
@@ -59,7 +70,7 @@ define(function (require, exports, module) {
     }
 
     function _getDemoData(fullPath) {
-        var prefix = "/Getting Started/";
+        var prefix = "/Github/";
         if (fullPath.substr(0, prefix.length) !== prefix) {
             return null;
         }
@@ -78,14 +89,14 @@ define(function (require, exports, module) {
         return dir;
     }
 
-    function _makeStat(demoData) {
+    function _makeStat(data) {
         var options = {
-            isFile: typeof demoData === "string",
+            isFile: data.type === "file",
             mtime: new Date(0),
-            hash: 0
+            hash: data.sha
         };
         if (options.isFile) {
-            options.size = demoData.length;
+            options.size = data.size;
         }
         return new FileSystemStats(options);
     }
@@ -101,12 +112,14 @@ define(function (require, exports, module) {
             return;
         }
 
-        var result = _getDemoData(path);
-        if (result || result === "") {
-            callback(null, _makeStat(result));
-        } else {
-            callback(FileSystemError.NOT_FOUND);
-        }
+        repo.read(info.default_branch, '.'.concat(path), function(err, data) {
+          var result = data
+          if (result || result === "") {
+              callback(null, _makeStat(result));
+          } else {
+              callback(FileSystemError.NOT_FOUND);
+          }
+        });
     }
 
     function exists(path, callback) {
@@ -124,20 +137,26 @@ define(function (require, exports, module) {
             callback("Directory listing unavailable: " + path);
             return;
         }
-
-        var storeData = _getDemoData(path);
-        if (!storeData) {
-            callback(FileSystemError.NOT_FOUND);
-        } else if (typeof storeData === "string") {
-            callback(FileSystemError.INVALID_PARAMS);
-        } else {
-            var names = Object.keys(storeData);
+        console.log(path);
+        repo.contents(info.default_branch, path, function(err, contents) {
+          var storeData = contents;
+          console.log(storeData);
+          if (!storeData) {
+              callback(FileSystemError.NOT_FOUND);
+          }
+          else {
+            var names = [];
             var stats = [];
-            names.forEach(function (name) {
-                stats.push(_makeStat(storeData[name]));
+            storeData.forEach(function(file){
+              names.push(file.name);
+              stats.push(_makeStat(file));
             });
+            console.log(names);
             callback(null, names, stats);
-        }
+          }
+        });
+
+
     }
 
     function mkdir(path, mode, callback) {
@@ -149,7 +168,6 @@ define(function (require, exports, module) {
     }
 
     function readFile(path, options, callback) {
-        console.log("Reading 'file': " + path);
 
         if (typeof options === "function") {
             callback = options;
