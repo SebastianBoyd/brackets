@@ -640,6 +640,9 @@ define(function (require, exports, module) {
      * @return {!string} fullPath reference
      */
     function _getWelcomeProjectPath() {
+        if (brackets.inBrowser) {
+            return "/Getting Started/";
+        }
         return ProjectModel._getWelcomeProjectPath(Urls.GETTING_STARTED, FileUtils.getNativeBracketsDirectoryPath());
     }
 
@@ -889,8 +892,8 @@ define(function (require, exports, module) {
                 PreferencesManager._stateProjectLayer.setProjectPath(rootPath);
             }
 
-            // Populate file tree as long as we aren't running in the browser
-            if (!brackets.inBrowser) {
+            // Populate file tree
+            if (true) {
                 if (!isUpdating) {
                     _watchProjectRoot(rootPath);
                 }
@@ -1077,6 +1080,9 @@ define(function (require, exports, module) {
      */
     function deleteItem(entry) {
         var result = new $.Deferred();
+        if (brackets.unsupportedInBrowser()) {
+            return result.reject().promise();
+        }
 
         entry.moveToTrash(function (err) {
             if (!err) {
@@ -1308,6 +1314,9 @@ define(function (require, exports, module) {
      */
     renameItemInline = function (entry) {
         var d = new $.Deferred();
+        if (brackets.unsupportedInBrowser()) {
+            return d.reject().promise();
+        }
         
         model.startRename(entry)
             .done(function () {

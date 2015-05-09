@@ -30,17 +30,18 @@
  */
 define(function (require, exports, module) {
     "use strict";
-    
+
     var PreferencesBase = require("./PreferencesBase"),
         Async           = require("utils/Async"),
-    
+
         // The SETTINGS_FILENAME is used with a preceding "." within user projects
         SETTINGS_FILENAME = "brackets.json",
         STATE_FILENAME    = "state.json",
-    
+
         // User-level preferences
-        userPrefFile = brackets.app.getApplicationSupportDirectory() + "/" + SETTINGS_FILENAME;
-    
+//        userPrefFile = brackets.app.getApplicationSupportDirectory() + "/" + SETTINGS_FILENAME;
+        userPrefFile = "/$.brackets.config$/" + SETTINGS_FILENAME;
+
     /**
      * A deferred object which is used to indicate PreferenceManager readiness during the start-up.
      * @private
@@ -48,7 +49,7 @@ define(function (require, exports, module) {
      */
     var _prefManagerReadyDeferred = new $.Deferred();
 
-    /** 
+    /**
      * A boolean property indicating if the user scope configuration file is malformed.
      */
     var userScopeCorrupt = false;
@@ -58,7 +59,7 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Promises to add scopes. Used at init time only. 
+     * Promises to add scopes. Used at init time only.
      * @private
      * @type {Array.<$.Promise>}
      */
@@ -75,12 +76,12 @@ define(function (require, exports, module) {
 
     projectScope.addLayer(projectPathLayer);
     projectScope.addLayer(projectLanguageLayer);
-    
+
     // Create a User scope
     var userStorage             = new PreferencesBase.FileStorage(userPrefFile, true),
         userScope               = new PreferencesBase.Scope(userStorage),
         userLanguageLayer       = new PreferencesBase.LanguageLayer();
-    
+
     userScope.addLayer(userLanguageLayer);
 
     var userScopeLoading = manager.addScope("user", userScope);
@@ -112,27 +113,32 @@ define(function (require, exports, module) {
                 });
         });
 
-    
+
     // "State" is stored like preferences but it is not generally intended to be user-editable.
     // It's for more internal, implicit things like window size, working set, etc.
     var stateManager = new PreferencesBase.PreferencesSystem();
-    var userStateFile = brackets.app.getApplicationSupportDirectory() + "/" + STATE_FILENAME;
-    var smUserScope = new PreferencesBase.Scope(new PreferencesBase.FileStorage(userStateFile, true, true));
+//    var userStateFile = brackets.app.getApplicationSupportDirectory() + "/" + STATE_FILENAME;
+    var userStateFile = "/$.brackets.config$/" + STATE_FILENAME;
+    var smUserScope = new PreferencesBase.Scope(new PreferencesBase.FileStorage(userStateFile, true));
     var stateProjectLayer = new PreferencesBase.ProjectLayer();
     smUserScope.addLayer(stateProjectLayer);
     var smUserScopeLoading = stateManager.addScope("user", smUserScope);
-    
-    
+
+
     // Listen for times where we might be unwatching a root that contains one of the user-level prefs files,
     // and force a re-read of the file in order to ensure we can write to it later (see #7300).
     function _reloadUserPrefs(rootDir) {
+        if (brackets.inBrowser) {
+            return;  // TODO: is this applicable? depends on how backend stores prefs
+        }
+
         var prefsDir = brackets.app.getApplicationSupportDirectory() + "/";
         if (prefsDir.indexOf(rootDir.fullPath) === 0) {
             manager.fileChanged(userPrefFile);
             stateManager.fileChanged(userStateFile);
         }
     }
-    
+
     // Semi-Public API. Use this at your own risk. The public API is in PreferencesManager.
     exports.manager             = manager;
     exports.projectStorage      = projectStorage;
