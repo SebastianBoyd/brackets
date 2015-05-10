@@ -39,9 +39,8 @@ define(function (require, exports, module) {
       apiUrl: "https://api.github.com"
     });
     var info = "";
-    var repo = github.getRepo("SebastianBoyd", "Fitness");
+    var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
     repo.show(function(err, repo) {info = repo});
-
 
     // Brackets uses FileSystem to read from various internal paths that are not in the user's project storage. We
     // redirect core-extension access to a simple $.ajax() to read from the source code location we're running from,
@@ -70,7 +69,7 @@ define(function (require, exports, module) {
     }
 
     function _getDemoData(fullPath) {
-        var prefix = "/Github/";
+        var prefix = "/";
         if (fullPath.substr(0, prefix.length) !== prefix) {
             return null;
         }
@@ -100,6 +99,18 @@ define(function (require, exports, module) {
         }
         return new FileSystemStats(options);
     }
+    function _fakeStat(data) {
+      var options = {
+          isFile: true,
+          mtime: new Date(0),
+          hash: 0
+      };
+      if (options.isFile) {
+          options.size = data.length;
+      }
+      return new FileSystemStats(options);
+    }
+
     function _nameFromPath(path) {
         var segments = _stripTrailingSlash(path).split("/");
         return segments[segments.length - 1];
@@ -111,15 +122,27 @@ define(function (require, exports, module) {
             AjaxFileSystem.stat(path, callback);
             return;
         }
-
+        var result = _getDemoData(path);
+        if (result || result === "") {
+          callback(null, _makeStat(result));
+        }
+        else {
+          callback(FileSystemError.NOT_FOUND);
+        }
+        /*
+        console.log(path);
+        if (path == "/$.brackets.config$/keymap.json"){
+          callback(FileSystemError.NOT_FOUND);
+        }
         repo.read(info.default_branch, '.'.concat(path), function(err, data) {
-          var result = data
+          var result = data;
           if (result || result === "") {
               callback(null, _makeStat(result));
           } else {
               callback(FileSystemError.NOT_FOUND);
           }
         });
+        */
     }
 
     function exists(path, callback) {
@@ -133,28 +156,34 @@ define(function (require, exports, module) {
     }
 
     function readdir(path, callback) {
+        path = _stripTrailingSlash(path);
         if (_startsWith(path, CORE_EXTENSIONS_PREFIX)) {
             callback("Directory listing unavailable: " + path);
             return;
         }
-        console.log(path);
-        repo.contents(info.default_branch, path, function(err, contents) {
-          var storeData = contents;
-          console.log(storeData);
-          if (!storeData) {
-              callback(FileSystemError.NOT_FOUND);
-          }
-          else {
-            var names = [];
-            var stats = [];
-            storeData.forEach(function(file){
-              names.push(file.name);
-              stats.push(_makeStat(file));
-            });
-            console.log(names);
-            callback(null, names, stats);
-          }
-        });
+        else if (path == "/$.brackets.config$/"){
+          console.log("ok");
+          callback(FileSystemError.NOT_FOUND);
+        }
+
+        else {
+          repo.contents(info.default_branch, '.'.concat(path), function(err, contents) {
+            var storeData = contents;
+            if (!storeData) {
+                callback(FileSystemError.NOT_FOUND);
+            }
+            else {
+              var names = [];
+              var stats = [];
+              storeData.forEach(function(file){
+                names.push(file.name);
+                stats.push(_makeStat(file));
+              });
+              callback(null, names, stats);
+            }
+          });
+        }
+
 
 
     }
@@ -178,20 +207,34 @@ define(function (require, exports, module) {
             return;
         }
 
-        var storeData = _getDemoData(path);
-        if (!storeData && storeData !== "") {
-            callback(FileSystemError.NOT_FOUND);
-        } else if (typeof storeData !== "string") {
-            callback(FileSystemError.INVALID_PARAMS);
-        } else {
-            var name = _nameFromPath(path);
-            callback(null, storeData, _makeStat(storeData[name]));
+        if (_startsWith(path, )){
+          if (localStorage.bracketsState) {
+              localStorage.bracketsState = '';
+          } else {
+              localStorage.clickcount = 1;
+          }
         }
+
+        repo.read('master', '.'.concat(path), function(err, data) {
+          if (!data && data !== "") {
+              callback(FileSystemError.NOT_FOUND);
+          } else if (typeof data !== "string") {
+              callback(FileSystemError.INVALID_PARAMS);
+          } else {
+              var name = _nameFromPath(path);
+              callback(null, data, _fakeStat(data));
+          }
+        });
+
     }
 
 
     function writeFile(path, data, options, callback) {
-        callback("Cannot save to HTTP demo server");
+        repo.write(info.default_branch, '.'.concat(path), data, 'Brackets Web', function(err) {
+          console.log(err);
+          callback(null, true);
+        });
+
     }
 
     function unlink(path, callback) {

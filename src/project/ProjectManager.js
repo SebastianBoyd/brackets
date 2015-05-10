@@ -641,7 +641,7 @@ define(function (require, exports, module) {
      */
     function _getWelcomeProjectPath() {
         if (brackets.inBrowser) {
-            return "/Github/";
+            return "/";
         }
         return ProjectModel._getWelcomeProjectPath(Urls.GETTING_STARTED, FileUtils.getNativeBracketsDirectoryPath());
     }

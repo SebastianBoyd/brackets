@@ -12,7 +12,7 @@
 
 (function() {
   'use strict';
-  
+
   // Initial Setup
   // -------------
 
@@ -21,11 +21,11 @@
   if (typeof exports !== 'undefined') {
       XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
       _ = require('underscore');
-      var btoa = require('btoa'); //jshint ignore:line
-  } else { 
-      _ = window._; 
+      //var btoa = require('thirdparty/btoa'); //jshint ignore:line
+  } else {
+      _ = window._;
   }
-  
+
   //prefer native XMLHttpRequest always
   /* istanbul ignore if  */
   if (typeof window !== 'undefined' && typeof window.XMLHttpRequest !== 'undefined'){
@@ -248,7 +248,7 @@
         if (branch === currentTree.branch && currentTree.sha) {
           return cb(null, currentTree.sha);
         }
-        
+
         that.getRef('heads/' + branch, function(err, sha) {
           currentTree.branch = branch;
           currentTree.sha = sha;
@@ -264,7 +264,7 @@
           if (err) {
             return cb(err);
           }
-          
+
           cb(null, res.object.sha);
         });
       };
@@ -313,7 +313,7 @@
           if (err) {
             return cb(err);
           }
-          
+
           cb(null, tags);
         });
       };
