@@ -197,7 +197,7 @@ define(function (require, exports, module) {
     }
 
     function readFile(path, options, callback) {
-
+        console.log(path)
         if (typeof options === "function") {
             callback = options;
         }
@@ -207,12 +207,26 @@ define(function (require, exports, module) {
             return;
         }
 
-        if (_startsWith(path, )){
-          if (localStorage.bracketsState) {
-              localStorage.bracketsState = '';
-          } else {
-              localStorage.clickcount = 1;
+        if (path === '/$.brackets.config$/state.json'){
+          if (!localStorage.bracketsState) {
+            localStorage.bracketsState = '';
           }
+          callback(null, localStorage.bracketsState, _fakeStat(localStorage.bracketsState));
+          return;
+        }
+        if (path === '/$.brackets.config$/brackets.json'){
+          if (!localStorage.bracketsJSON) {
+            localStorage.bracketsJSON = '';
+          }
+          callback(null, localStorage.bracketsJSON, _fakeStat(localStorage.bracketsJSON));
+          return;
+        }
+        if (path === '/.brackets.json'){
+          if (!localStorage.dotbracketsJSON) {
+            localStorage.dotbracketsJSON = '';
+          }
+          callback(null, localStorage.dotbracketsJSON, _fakeStat(localStorage.dotbracketsJSON));
+          return;
         }
 
         repo.read('master', '.'.concat(path), function(err, data) {
@@ -230,6 +244,24 @@ define(function (require, exports, module) {
 
 
     function writeFile(path, data, options, callback) {
+        if (path === '/$.brackets.config$/state.json'){
+          localStorage.bracketsState = data;
+          callback(null, true);
+          return;
+        }
+        if (path === '/$.brackets.config$/brackets.json'){
+          localStorage.bracketsJSON = data;
+          callback(null, true);
+          return;
+        }
+        if (path === '/.brackets.json'){
+          localStorage.dotbracketsJSON = data;
+          callback(null, true);
+          return;
+        }
+        if (_startsWith(path, "/$.brackets.config$")){
+          console.log("ERRRRRORRRR");
+        }
         repo.write(info.default_branch, '.'.concat(path), data, 'Brackets Web', function(err) {
           console.log(err);
           callback(null, true);
@@ -242,7 +274,9 @@ define(function (require, exports, module) {
     }
 
     function moveToTrash(path, callback) {
-        callback("Cannot delete files on HTTP demo server");
+        repo.remove(info.default_branch, '.'.concat(path), function(err) {
+          callback(null, true);
+        });
     }
 
     function initWatchers(changeCallback, offlineCallback) {
