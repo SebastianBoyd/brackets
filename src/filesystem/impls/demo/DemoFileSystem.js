@@ -33,11 +33,13 @@ define(function (require, exports, module) {
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
 
     require("thirdparty/github");
-
-    var github = new Github({
-      token: "2c2808ce09eb0b9b3996a1fe3b376657acedd04b",
-      auth: "oauth",
-      apiUrl: "https://api.github.com"
+    var code = window.location.href.match(/\?code=(.*)/)[1];
+    $.getJSON('http://localhost:9999/authenticate/'+code, function(data) {
+      var github = new Github({
+        token: data.token,
+        auth: "oauth",
+        apiUrl: "https://api.github.com"
+      });
     });
     var info = "";
     var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
