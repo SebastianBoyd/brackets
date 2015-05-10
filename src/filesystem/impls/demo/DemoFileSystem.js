@@ -33,8 +33,9 @@ define(function (require, exports, module) {
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
 
     require("thirdparty/github");
+
     var github = new Github({
-      token: "",
+      token: "2c2808ce09eb0b9b3996a1fe3b376657acedd04b",
       auth: "oauth",
       apiUrl: "https://api.github.com"
     });
