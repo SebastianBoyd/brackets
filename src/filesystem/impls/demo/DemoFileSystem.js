@@ -35,15 +35,17 @@ define(function (require, exports, module) {
     require("thirdparty/github");
     var code = window.location.href.match(/\?code=(.*)/)[1];
     $.getJSON('http://brackets.sebastianboyd.com:9999/authenticate/'+code, function(data) {
+      console.log(data.token);
       var github = new Github({
         token: data.token,
         auth: "oauth",
         apiUrl: "https://api.github.com"
       });
+      var info = "";
+      var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
+      repo.show(function(err, repo) {info = repo});
     });
-    var info = "";
-    var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
-    repo.show(function(err, repo) {info = repo});
+
 
     // Brackets uses FileSystem to read from various internal paths that are not in the user's project storage. We
     // redirect core-extension access to a simple $.ajax() to read from the source code location we're running from,
