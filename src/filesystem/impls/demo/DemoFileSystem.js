@@ -34,7 +34,7 @@ define(function (require, exports, module) {
 
     require("thirdparty/github");
     var github = new Github({
-      token: "9d8f9647228bff9f8698523836780d361a17754f",
+      token: "",
       auth: "oauth",
       apiUrl: "https://api.github.com"
     });
