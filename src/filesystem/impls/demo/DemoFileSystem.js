@@ -36,18 +36,17 @@ define(function (require, exports, module) {
     var github = {};
     var info = {};
     require("thirdparty/github");
-    
+
     var github = new Github({
       token: localStorage.token,
       auth: "oauth",
       apiUrl: "https://api.github.com"
     });
 
-      var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
-      repo.show(function(err, repo) {
-        info = repo;
-        console.log(info);
-      });
+    var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
+    repo.show(function(err, repo) {
+      info = repo;
+      console.log(info);
     });
 
 
