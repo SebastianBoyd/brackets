@@ -35,7 +35,7 @@ define(function (require, exports, module) {
     require("thirdparty/github");
     var code = window.location.href.match(/\?code=(.*)/)[1];
     $.getJSON('http://api.sebastianboyd.com/authenticate/'+code, function(data) {
-      window.history.pushState('Welcome', 'Brackets', '/');
+      window.history.pushState('Welcome', 'Brackets', '/src/app');
       var info = "";
       console.log(data.token);
       var github = new Github({
