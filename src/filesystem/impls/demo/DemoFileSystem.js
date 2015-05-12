@@ -44,7 +44,10 @@ define(function (require, exports, module) {
         apiUrl: "https://api.github.com"
       });
       var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
-      repo.show(function(err, repo) {var info = repo});
+      repo.show(function(err, repo) {
+        info = repo;
+        console.log(repo);
+      });
       console.log(github);
       console.log(repo);
       console.log(info);
