@@ -33,6 +33,7 @@ define(function (require, exports, module) {
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
     var repo = {};
     var github = {};
+    var info = {};
     require("thirdparty/github");
     var code = window.location.href.match(/\?code=(.*)/)[1];
     $.getJSON('http://api.sebastianboyd.com/authenticate/'+code, function(data) {
@@ -47,7 +48,7 @@ define(function (require, exports, module) {
       var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
       repo.show(function(err, repo) {
         info = repo;
-        console.log(repo);
+        console.log(info);
       });
       console.log(github);
       console.log(repo);
