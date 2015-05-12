@@ -45,6 +45,8 @@ define(function (require, exports, module) {
       var info = "";
       var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
       repo.show(function(err, repo) {info = repo});
+      console.log(github);
+      console.log(repo);
       console.log(info);
     });
 
