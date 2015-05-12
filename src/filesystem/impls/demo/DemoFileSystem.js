@@ -157,7 +157,7 @@ define(function (require, exports, module) {
     }
 
     function exists(path, callback) {
-        while (repo == {}) {
+        while ($.isEmptyObject(repo)) {
 
         }
         stat(path, function (err) {
@@ -170,8 +170,7 @@ define(function (require, exports, module) {
     }
 
     function readdir(path, callback) {
-        while (repo == {}) {
-          console.log("true");
+        while ($.isEmptyObject(repo)) {
         }
         path = _stripTrailingSlash(path);
         if (_startsWith(path, CORE_EXTENSIONS_PREFIX)) {
