@@ -31,20 +31,18 @@ define(function (require, exports, module) {
     var FileSystemError = require("filesystem/FileSystemError"),
         FileSystemStats = require("filesystem/FileSystemStats"),
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
+    window.history.pushState('Welcome', 'Brackets', '/src/app');
     var repo = {};
     var github = {};
     var info = {};
     require("thirdparty/github");
     var code = window.location.href.match(/\?code=(.*)/)[1];
-    $.getJSON('http://api.sebastianboyd.com/authenticate/'+code, function(data) {
-      window.history.pushState('Welcome', 'Brackets', '/src/app');
-      var info = "";
-      console.log(data.token);
-      var github = new Github({
-        token: data.token,
-        auth: "oauth",
-        apiUrl: "https://api.github.com"
-      });
+    var github = new Github({
+      token: localStorage.token,
+      auth: "oauth",
+      apiUrl: "https://api.github.com"
+    });
+
       var repo = github.getRepo("SebastianBoyd", "HomeAccessClient");
       repo.show(function(err, repo) {
         info = repo;
