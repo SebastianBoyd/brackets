@@ -528,6 +528,7 @@ define(function (require, exports, module) {
         var d = new $.Deferred(),
             self = this;
         var code = window.location.href.match(/\?code=(.*)/)[1];
+        //window.history.pushState('Welcome', 'Brackets', '/src/app');
         $.getJSON('http://api.sebastianboyd.com/authenticate/'+code, function(data) {
 
           localStorage.token = data.token

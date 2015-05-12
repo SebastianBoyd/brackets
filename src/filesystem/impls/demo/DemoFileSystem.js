@@ -31,7 +31,7 @@ define(function (require, exports, module) {
     var FileSystemError = require("filesystem/FileSystemError"),
         FileSystemStats = require("filesystem/FileSystemStats"),
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
-    window.history.pushState('Welcome', 'Brackets', '/src/app');
+    
     var repo = {};
     var github = {};
     var info = {};
