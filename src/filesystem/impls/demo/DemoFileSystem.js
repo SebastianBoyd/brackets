@@ -157,9 +157,6 @@ define(function (require, exports, module) {
     }
 
     function exists(path, callback) {
-        while ($.isEmptyObject(repo)) {
-
-        }
         stat(path, function (err) {
             if (err) {
                 callback(null, false);
@@ -170,8 +167,6 @@ define(function (require, exports, module) {
     }
 
     function readdir(path, callback) {
-        while ($.isEmptyObject(repo)) {
-        }
         path = _stripTrailingSlash(path);
         if (_startsWith(path, CORE_EXTENSIONS_PREFIX)) {
             callback("Directory listing unavailable: " + path);
