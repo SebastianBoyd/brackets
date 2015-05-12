@@ -50,9 +50,6 @@ define(function (require, exports, module) {
         info = repo;
         console.log(info);
       });
-      console.log(github);
-      console.log(repo);
-      console.log(info);
     });
 
 
@@ -160,6 +157,9 @@ define(function (require, exports, module) {
     }
 
     function exists(path, callback) {
+        while (repo == {}) {
+          
+        }
         stat(path, function (err) {
             if (err) {
                 callback(null, false);
