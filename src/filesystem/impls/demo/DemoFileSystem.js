@@ -31,12 +31,12 @@ define(function (require, exports, module) {
     var FileSystemError = require("filesystem/FileSystemError"),
         FileSystemStats = require("filesystem/FileSystemStats"),
         AjaxFileSystem  = require("filesystem/impls/demo/AjaxFileSystem");
-    
+
     var repo = {};
     var github = {};
     var info = {};
     require("thirdparty/github");
-
+    
     var github = new Github({
       token: localStorage.token,
       auth: "oauth",
