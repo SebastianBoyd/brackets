@@ -36,7 +36,7 @@ define(function (require, exports, module) {
     var github = {};
     var info = {};
     require("thirdparty/github");
-    var code = window.location.href.match(/\?code=(.*)/)[1];
+    
     var github = new Github({
       token: localStorage.token,
       auth: "oauth",

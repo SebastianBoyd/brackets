@@ -527,7 +527,7 @@ define(function (require, exports, module) {
 
         var d = new $.Deferred(),
             self = this;
-
+        var code = window.location.href.match(/\?code=(.*)/)[1];
         $.getJSON('http://api.sebastianboyd.com/authenticate/'+code, function(data) {
 
           localStorage.token = data.token
@@ -541,7 +541,7 @@ define(function (require, exports, module) {
               }
           });
           return d.promise();
-        };
+        });
     };
 
     /**
