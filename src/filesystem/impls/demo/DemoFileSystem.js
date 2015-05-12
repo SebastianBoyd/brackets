@@ -158,7 +158,7 @@ define(function (require, exports, module) {
 
     function exists(path, callback) {
         while (repo == {}) {
-          
+
         }
         stat(path, function (err) {
             if (err) {
@@ -170,6 +170,9 @@ define(function (require, exports, module) {
     }
 
     function readdir(path, callback) {
+        while (repo == {}) {
+          console.log("true");
+        }
         path = _stripTrailingSlash(path);
         if (_startsWith(path, CORE_EXTENSIONS_PREFIX)) {
             callback("Directory listing unavailable: " + path);
